@@ -90,7 +90,7 @@ class PolEngDS(Dataset):
             'english': []
         }
         
-        for i, (pl, en) in enumerate(zip(*self.data.values())):
+        for pl, en in zip(*self.data.values()):
             preprocessed_data['polish'].append(self._text_prep(pl))
             preprocessed_data['english'].append(self._text_prep(en))
         
