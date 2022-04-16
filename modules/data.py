@@ -3,7 +3,7 @@ import string
 import torch
 import pandas as pd
 from torch.utils.data import DataLoader, Dataset
-from torch.nn.utils.rnn import pad_sequence
+from torch.nn.utils.rnn import pad_sequence      
 
 class Vocabulary:
     def __init__(self, data):
@@ -15,7 +15,7 @@ class Vocabulary:
             '<eos>': 3
         }
         
-        self.build_vocab(data)
+        self.build_vocab(data, min_freq=2)
         
     def __getitem__(self, index):
         assert type(index) in [str, int], 'Index type must be string or int'
@@ -40,12 +40,23 @@ class Vocabulary:
         if not word in self.vocab and word.isalpha():
             self.vocab[word] = len(self)
     
-    def build_vocab(self, data):
-        bag_of_words = sorted(list(set(data)))
+    def build_vocab(self, data, min_freq=2):
+        freq = {}
+        for word in data:
+            if word in freq:
+                freq[word] += 1
+            else:
+                freq[word] = 1
+            
+        freq = pd.Series(freq)
+        freq = freq[freq >= min_freq]
+        data = list(freq.index)
         
+        bag_of_words = sorted(list(set(data)))
+
         for word in bag_of_words:
             self.append_word(word)
-
+  
 
 class PolEngDS(Dataset):
     def __init__(self, pl_path, en_path, limit=None):
